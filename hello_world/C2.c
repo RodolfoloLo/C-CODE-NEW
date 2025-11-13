@@ -2,20 +2,16 @@
 
 int main()
 {
-    int x;
-    int count[10]={0};
     int i;
+    int j;
 
-    
-    scanf("%d",&x);
-    while(x!=-1){
-        if(x>=0&&x<=9){
-            count[x]++;
+    for(i=1;i<=9;i++){
+        for(j=1;j<=i;j++){
+            int result;
+            result=i*j;
+            printf("%d*%d=%d  ",i,j,result);
         }
-        scanf("%d",&x);
-    }
-    for(i=0;i<10;i++){
-        printf("%d%d\n",i,count[i]);
+        printf("\n");
     }
     return 0;
 }
