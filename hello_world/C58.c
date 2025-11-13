@@ -59,136 +59,160 @@ U202098765 Jerry 260 65.00
 #include<stdlib.h>
 #include<string.h>
 
-typedef struct student{
+typedef struct student {
     char ID[23];
     char Name[10];
     int English;
     int Math;
     int Physics;
     int C;
-    struct student *next;  // 这里要用struct student
-} student;
+    double average;
+    struct student *next;
+} Student;
 
-student *head = NULL;  // 全局链表头指针
-//清空输入缓冲区
-void clear_inppt_buffer(){
-    int c;
-    while((c=getchar())!='\n'&&c!=EOF);//最常见的方法 
+Student *head = NULL;
+
+// 交换两个节点的数据!
+void swap_data(Student *a, Student *b) {
+    Student temp = *a;
+    *a = *b;
+    *b = temp;
+    // 特别处理next指针，保持链表连接
+    Student *temp_next = a->next;
+    a->next = b->next;
+    b->next = temp_next;
 }
-// 1. 输入学生信息（尾插法）
-void create_list(int count){
-    student *new_node, *tail;
+
+// 冒泡排序
+void sort_by_average() {
+    if (head == NULL || head->next == NULL) return;
     
-    for(int i = 0; i < count; i++){
-        clear_inppt_buffer();
-        new_node = (student*)malloc(sizeof(student));
+    int swapped;
+    Student *ptr;
+    Student *last = NULL;
+    
+    do {
+        swapped = 0;
+        ptr = head;
         
-        scanf("%s", new_node->ID);
-        scanf("%s", new_node->Name);
-        scanf("%d", &new_node->English);    // 要加&
-        scanf("%d", &new_node->Math);
-        scanf("%d", &new_node->Physics);
-        scanf("%d", &new_node->C);
+        while (ptr->next != last) {
+            if (ptr->average > ptr->next->average) {
+                swap_data(ptr, ptr->next);
+                swapped = 1;
+            }
+            ptr = ptr->next;
+        }
+        last = ptr;
+    } while (swapped);
+}
+
+// 1. 输入学生信息
+void create_list(int n) {
+    for (int i = 0; i < n; i++) {
+        Student *new_node = (Student*)malloc(sizeof(Student));
+        
+        scanf("%s %s %d %d %d %d", 
+              new_node->ID, new_node->Name,
+              &new_node->English, &new_node->Math,
+              &new_node->Physics, &new_node->C);
+        
+        new_node->average = (new_node->English + new_node->Math + 
+                           new_node->Physics + new_node->C) / 4.0;
         new_node->next = NULL;
         
-        if(head == NULL){
-            head = new_node;
-            tail = new_node;
-        } else {
-            tail->next = new_node;
-            tail = new_node;
-        }
+        // 头插法
+        new_node->next = head;
+        head = new_node;
     }
 }
 
-// 2. 输出所有学生信息
-void print_all_students(){
-    student *p = head;
-    while(p != NULL){
+// 2. 输出学生信息
+void print_students() {
+    sort_by_average();
+    Student *p = head;
+    while (p != NULL) {
         printf("%s %s %d %d %d %d\n", 
                p->ID, p->Name, p->English, p->Math, p->Physics, p->C);
         p = p->next;
     }
 }
 
-// 3. 修改学生成绩
-void modify_score(){
-    char target_id[23];
-    int subject, new_score;
-    scanf("%s %d %d", target_id, &subject, &new_score);
+// 3. 修改成绩
+void modify_score() {
+    char id[23];
+    int subject, score;
+    scanf("%s %d %d", id, &subject, &score);
     
-    student *p = head;
-    while(p != NULL){
-        if(strcmp(p->ID, target_id) == 0){
-            switch(subject){
-                case 1: p->English = new_score; break;
-                case 2: p->Math = new_score; break;
-                case 3: p->Physics = new_score; break;
-                case 4: p->C = new_score; break;
+    Student *p = head;
+    while (p != NULL) {
+        if (strcmp(p->ID, id) == 0) {
+            switch(subject) {
+                case 1: p->English = score; break;
+                case 2: p->Math = score; break;
+                case 3: p->Physics = score; break;
+                case 4: p->C = score; break;
             }
-            return;
+            p->average = (p->English + p->Math + p->Physics + p->C) / 4.0;
+            break;
         }
         p = p->next;
     }
 }
 
-// 4. 计算并输出平均分
-void calculate_average(){
-    student *p = head;
-    while(p != NULL){
-        double avg = (p->English + p->Math + p->Physics + p->C) / 4.0;
-        printf("%s %s %.2f\n", p->ID, p->Name, avg);
+// 4. 输出平均分
+void print_average() {
+    sort_by_average();
+    Student *p = head;
+    while (p != NULL) {
+        printf("%s %s %.2f\n", p->ID, p->Name, p->average);
         p = p->next;
     }
 }
 
-// 5. 输出总成绩和平均成绩
-void print_total_and_average(){
-    student *p = head;
-    while(p != NULL){
+// 5. 输出总分和平均分
+void print_total_avg() {
+    sort_by_average();
+    Student *p = head;
+    while (p != NULL) {
         int total = p->English + p->Math + p->Physics + p->C;
-        double avg = total / 4.0;
-        printf("%s %s %d %.2f\n", p->ID, p->Name, total, avg);
+        printf("%s %s %d %.2f\n", p->ID, p->Name, total, p->average);
         p = p->next;
     }
 }
 
-int main(){
+int main() {
     int choice;
     
-    while(1){
+    while (1) {
         scanf("%d", &choice);
+        if (choice == 0) break;
         
-        if(choice == 0) {
-            break;  // 退出程序
-        }
-        
-        switch(choice){
+        switch(choice) {
             case 1: {
-                int count;
-                scanf("%d", &count);
-                create_list(count);
+                int n;
+                scanf("%d", &n);
+                create_list(n);
                 break;
             }
             case 2:
-                print_all_students();
+                print_students();
                 break;
             case 3:
                 modify_score();
                 break;
             case 4:
-                calculate_average();
+                print_average();
                 break;
             case 5:
-                print_total_and_average();
+                print_total_avg();
                 break;
         }
     }
     
-    // 释放链表内存（可选）
-    student *p = head;
-    while(p != NULL){
-        student *temp = p;
+    // 释放内存
+    Student *p = head;
+    while (p != NULL) {
+        Student *temp = p;
         p = p->next;
         free(temp);
     }
@@ -200,16 +224,16 @@ int main(){
 本关任务：
 对程序设计的第二题增加按照平均成绩进行升序排序的函数，写出用交换结点数据域的方法升序排序的函数，排序可用选择法或冒泡法。菜单选项：
 
-退出
-输入每个学生的各项信息
-输出每个学生的各项信息，结果按平均成绩升序排序
-修改指定学生的指定数据项的内容：
+0退出
+1输入每个学生的各项信息
+2输出每个学生的各项信息，结果按平均成绩升序排序
+3修改指定学生的指定数据项的内容：
 修改英语成绩
 修改高等数学成绩
 修改普通物理成绩
 修改C语言成绩
-统计每个学生的平均成绩，结果按平均成绩升序排序（保留2位小数）
-输出各位学生的学号、姓名、4门课程的总成绩和平均成绩，结果平均成绩升序排序
+4统计每个学生的平均成绩，结果按平均成绩升序排序（保留2位小数）
+5输出各位学生的学号、姓名、4门课程的总成绩和平均成绩，结果平均成绩升序排序
 相关知识
 为了完成本关任务，你需要掌握：1.排序，2.链表。
 
