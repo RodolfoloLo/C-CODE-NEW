@@ -117,6 +117,16 @@ int main(){
     bool found=binary_search(vec7.begin(),vec7.end(),5);
     cout<<found<<endl; 
 
-
+//&map  map是键值对，它会自动将所有的键值从小到大排序
+    map<string,int>map0;
+    map0["zby"]=648;
+    map0["nwh"]=682;
+    cout<<"zby:"<<map0["zby"]<<endl;
+    for(auto p=m.begin(),p!=m.end(),p++){
+        cout<<p->first<<":"<<p->second<<endl;
+        cout<<(*p).first<<":"<<(*p).second<<endl;
+    }
+    cout<<map0.size()<<endl;
+    
     return 0;
 }
